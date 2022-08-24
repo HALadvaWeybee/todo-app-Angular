@@ -8,23 +8,104 @@ import { Component, OnInit } from '@angular/core';
 export class TodolistComponent implements OnInit {
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  todoList: { id: number; data: string; isCompleted: boolean }[] = [];
+  showTodo: boolean = false;
+  searchArr: any[] = [];
+  filter: 'all' | 'active' | 'done' = 'all';
+  action: string = '';
+  select:string = '';
+  searchAction:string = '';
+  displayField:boolean = false;
+
+  addTodo(todo: any, search: any) {
+    let obj = this.todoList.find((ele) => ele.data === todo.value);
+    if (this.todoList.length > 0 && obj !== undefined && todo.value !== '') {
+      alert('Entered value is already in the list!!');
+    } else if (todo.value) {
+      this.showTodo = false;
+      search.disabled = true;
+      todo.disabled = false;
+      this.todoList.push({
+        id: this.todoList.length,
+        data: todo.value,
+        isCompleted: false,
+      });
+      todo.value = '';
+    } else {
+      alert('please enter the value');
+    }
   }
 
-  todoList: { id: number; data: string, isCompleted:string }[] = [];
-  isDisabled: boolean = true;
-  show:boolean = true;
-  showTodo:boolean = false;
-  searchArr:any[] = [];
+  get mylist() {
+    switch (this.select) {
+      case "deleteSelected":
+      for (let i = 0; i < this.todoList.length; i++) {
+        if (this.todoList[i].isCompleted) {
+          this.todoList.splice(i, 1);
+          i--;
+        }
+      }
+      this.select = '';
+      break;
 
-  addTodo(todo:any, search:any) {
-    search.disabled = true;
-    todo.disabled = false;
-    this.show = true;
+    case "selectAll":
+      for (let i = 0; i < this.todoList.length; i++) {
+        this.todoList[i].isCompleted = true;
+      }
+      this.select = '';
+      break;
 
-    this.todoList.push({ id: this.todoList.length, data: todo.value, isCompleted:''});
-    todo.value = ''; 
-    // this.myList(this.todoList);  
+    case "unselectAll":
+      for (let i = 0; i < this.todoList.length; i++) {
+        this.todoList[i].isCompleted = false;
+      }
+      this.select = '';
+      break;
+    }
+    switch (this.action) {
+      case 'A-Z':
+        this.todoList.sort((a, b) => {
+          let fa = a.data.toLowerCase(),
+            fb = b.data.toLowerCase();
+          if (fa < fb) {
+            return -1;
+          }
+          if (fa > fb) {
+            return 1;
+          }
+          return 0;
+        });
+        break;
+
+      case 'Z-A':
+        this.todoList.sort((a, b) => {
+          let fa = a.data.toLowerCase(),
+            fb = b.data.toLowerCase();
+          if (fa < fb) {
+            return 1;
+          }
+          if (fa > fb) {
+            return -1;
+          }
+          return 0;
+        });
+        break;
+      case 'Newest':
+        this.todoList.reverse();
+        break;
+      case 'Oldest':
+        break;
+    }
+    
+   
+      if (this.filter === 'all') {
+        return this.todoList;
+      }
+      return this.todoList.filter((item) =>
+        this.filter === 'done' ? item.isCompleted==true : item.isCompleted==false
+      );
   }
 
   deleteTodo(id: number) {
@@ -40,59 +121,41 @@ export class TodolistComponent implements OnInit {
     ele[0].data = data.value;
     data.disabled = true;
   }
-  
-  searchTodo(todo:any, search:any) {
+
+  searchTodo(todo: any, search: any) {
     search.disabled = false;
     todo.disabled = true;
-    
   }
 
-  searchTodoWord(searchData: any, todo:any) {
+  searchTodoWord(searchData: any, todo: any) {
     this.showTodo = true;
     this.searchArr = [];
     const inputData = searchData.value;
-    let filter = inputData.toUpperCase(), txtValue, count = 0;
+    let filter = inputData.toUpperCase(),
+      txtValue,
+      count = 0;
 
-    for(let i = 0; i < this.todoList.length; i++) {
-       txtValue = this.todoList[i].data;
-       if(txtValue.toUpperCase().indexOf(filter) > -1) {
-          this.searchArr.push(this.todoList[i]);
-          
-          count++;
-       }
+    for (let i = 0; i < this.todoList.length; i++) {
+      txtValue = this.todoList[i].data;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        this.searchArr.push(this.todoList[i]);
+
+        count++;
+      }
     }
-    if(count == 0) {
+    if (count == 0) {
       todo.value = searchData.value;
     }
-  //   const li = this.ElementRef.nativeElement.getElementsByTagName('li');
-  //   const inputData = searchData.value;
-  //   let input,txtValue,filter,count = 0;
-  //   filter = inputData.toUpperCase();
-
-  // for (let i = 0; i < li.length; i++) {
-  //   // input = li[i].getElementsByTagName("input")[0];
-  //   input = li[i].getElementsByClassName("list-value")[0];
-  //   txtValue = input.value;
-
-  //   if (txtValue.toUpperCase().indexOf(filter) > -1) {
-  //     li[i].style.display = "";
-  //     count++;
-  //   } else {
-  //     li[i].style.display = "none";
-  //   }
-  // }
-  // if (count == 0) {
-  //   todo.value = searchData.value;
-  // }
+    this.mylist;
   }
 
-  checkOrNot(id:number) {
-    
-  } 
-
-  myList() {
-    return this.todoList;
+  checkOrNot(id: number) {
+    const index = this.todoList.findIndex((ele) => ele.id == id);
+    // this.todoList[index].isCompleted = !this.todoList[index].isCompleted;
+    if(this.todoList[index].isCompleted) {
+      this.todoList[index].isCompleted = false;
+    } else {
+      this.todoList[index].isCompleted = true;
+    }
   }
-
-  
 }
